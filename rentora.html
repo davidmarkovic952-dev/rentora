@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rentora — Upravljanje nekretninama</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --cream:#f7f4ef;--warm:#ede8e0;--card:#ffffff;--border:#e2ddd6;
+  --accent:#2d5016;--gold:#c8a84b;--text:#1a1a18;--muted:#7a7568;
+  --red:#c0392b;--green:#2d5016;
+  --fraunces:'Fraunces',serif;--dm:'DM Sans',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--cream);color:var(--text);font-family:var(--dm);min-height:100vh}
+button{font-family:var(--dm);cursor:pointer;border:none}
+input,select,textarea{font-family:var(--dm)}
+
+/* NAV */
+nav{
+  background:#1a1a18;color:#f7f4ef;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 48px;height:64px;position:sticky;top:0;z-index:100;
+}
+.logo{font-family:var(--fraunces);font-weight:900;font-size:1.4rem;letter-spacing:-.02em;color:#f7f4ef}
+.logo span{color:var(--gold)}
+.nav-right{display:flex;align-items:center;gap:16px}
+.nav-stat{color:rgba(247,244,239,.5);font-size:.82rem}
+.nav-btn{
+  background:rgba(200,168,75,.15);color:var(--gold);
+  border:1px solid rgba(200,168,75,.3);padding:8px 20px;
+  border-radius:6px;font-size:.85rem;font-weight:600;transition:all .2s;
+}
+.nav-btn:hover{background:rgba(200,168,75,.25)}
+
+/* HERO STRIP */
+.hero-strip{
+  background:linear-gradient(135deg,#1a1a18 0%,#2d2a22 100%);
+  color:#f7f4ef;padding:48px 48px 40px;
+}
+.hero-label{color:var(--gold);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.hero-title{font-family:var(--fraunces);font-weight:900;font-size:clamp(2.2rem,5vw,3.8rem);line-height:1.1;letter-spacing:-.03em;margin-bottom:16px}
+.hero-sub{color:rgba(247,244,239,.6);font-size:1rem;max-width:480px;line-height:1.6}
+.stats-row{display:flex;gap:40px;margin-top:32px;padding-top:32px;border-top:1px solid rgba(247,244,239,.1)}
+.stat-num{font-family:var(--fraunces);font-weight:700;font-size:1.8rem;color:#f7f4ef;line-height:1}
+.stat-label{color:rgba(247,244,239,.5);font-size:.78rem;margin-top:4px}
+
+/* CONTENT */
+.content{padding:32px 48px 80px}
+
+/* FILTER BAR */
+.filter-bar{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  margin-bottom:24px;padding:20px 24px;
+  background:#fff;border-radius:12px;border:1px solid var(--border);
+  box-shadow:0 2px 8px rgba(0,0,0,.04);
+}
+.filter-btn{
+  background:transparent;border:1px solid var(--border);color:var(--muted);
+  padding:7px 16px;border-radius:100px;font-size:.8rem;transition:all .2s;white-space:nowrap;
+}
+.filter-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.divider{width:1px;background:var(--border);height:24px;margin:0 4px}
+.search-input{
+  background:var(--cream);border:1px solid var(--border);color:var(--text);
+  padding:8px 14px;border-radius:8px;font-size:.875rem;outline:none;min-width:200px;transition:border-color .2s;
+}
+.search-input:focus{border-color:var(--accent)}
+.sort-select{
+  background:var(--cream);border:1px solid var(--border);color:var(--text);
+  padding:8px 14px;border-radius:8px;font-size:.82rem;outline:none;
+}
+.add-btn-bar{
+  background:var(--accent);color:#fff;padding:9px 20px;
+  border-radius:8px;font-size:.85rem;font-weight:700;
+  transition:all .2s;margin-left:auto;
+}
+.add-btn-bar:hover{background:#3d6b1f}
+
+/* GRID */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px}
+
+/* CARD */
+.card{
+  background:#fff;border:1px solid var(--border);border-radius:16px;
+  overflow:hidden;transition:all .2s;cursor:pointer;
+  box-shadow:0 1px 4px rgba(0,0,0,.04);
+}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.1)}
+.card-img{
+  height:140px;display:flex;align-items:center;justify-content:center;
+  font-size:4rem;background:var(--cream);position:relative;
+}
+.card-badge{
+  position:absolute;top:12px;left:12px;
+  font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:100px;letter-spacing:.03em;
+}
+.card-floor{
+  position:absolute;top:12px;right:12px;
+  background:rgba(26,26,24,.7);color:#fff;
+  font-size:.7rem;padding:3px 10px;border-radius:100px;
+}
+.card-body{padding:20px}
+.card-name{font-family:var(--fraunces);font-weight:700;font-size:1.05rem;margin-bottom:4px;line-height:1.3}
+.card-addr{color:var(--muted);font-size:.78rem;margin-bottom:12px}
+.card-meta{display:flex;gap:16px;margin-bottom:14px;flex-wrap:wrap}
+.meta-item{color:var(--muted);font-size:.78rem}
+.card-tenant{
+  display:flex;align-items:center;gap:6px;margin-top:8px;
+  background:#fdf8ee;padding:8px 12px;border-radius:8px;font-size:.78rem;color:var(--muted);
+}
+.card-footer{display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid #f0ece5}
+.card-rent{font-family:var(--fraunces);font-weight:700;font-size:1.3rem}
+.card-rent-sub{color:var(--muted);font-size:.72rem}
+.card-actions{display:flex;gap:6px}
+.icon-btn{
+  background:var(--cream);border:1px solid var(--border);color:var(--text);
+  width:32px;height:32px;border-radius:8px;font-size:.85rem;
+  display:flex;align-items:center;justify-content:center;transition:all .2s;
+}
+.icon-btn.danger{background:rgba(192,57,43,.06);border-color:rgba(192,57,43,.2);color:var(--red)}
+.icon-btn:hover{transform:scale(1.05)}
+
+/* EMPTY STATE */
+.empty-state{grid-column:1/-1;text-align:center;padding:80px 20px;color:var(--muted)}
+
+/* OVERLAY */
+.overlay{
+  position:fixed;inset:0;background:rgba(26,26,24,.6);
+  display:flex;align-items:center;justify-content:center;
+  z-index:200;padding:20px;backdrop-filter:blur(6px);
+}
+.overlay.hidden{display:none}
+
+/* MODAL */
+.modal{
+  background:#fff;border-radius:20px;max-width:620px;width:100%;
+  max-height:90vh;overflow-y:auto;box-shadow:0 40px 80px rgba(0,0,0,.3);
+}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:28px 32px 0}
+.modal-title{font-family:var(--fraunces);font-weight:700;font-size:1.3rem}
+.close-btn{
+  background:var(--cream);border:1px solid var(--border);color:var(--text);
+  width:36px;height:36px;border-radius:10px;font-size:1.1rem;
+  display:flex;align-items:center;justify-content:center;transition:all .2s;
+}
+.close-btn:hover{background:var(--warm)}
+.modal-body{padding:20px 32px 32px}
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:6px;font-weight:600;letter-spacing:.03em;text-transform:uppercase}
+.form-input{
+  width:100%;background:var(--cream);border:1px solid var(--border);
+  color:var(--text);padding:11px 14px;border-radius:8px;font-size:.9rem;outline:none;transition:border-color .2s;
+}
+.form-input:focus{border-color:var(--accent)}
+textarea.form-input{resize:vertical;min-height:80px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.check-row{display:flex;gap:20px;flex-wrap:wrap}
+.check-item{display:flex;align-items:center;gap:8px;font-size:.875rem;cursor:pointer}
+.check-item input{width:16px;height:16px;accent-color:var(--accent)}
+.submit-btn{
+  width:100%;background:var(--accent);color:#fff;padding:13px;
+  border-radius:10px;font-weight:700;font-size:.95rem;margin-top:8px;transition:all .2s;
+}
+.submit-btn:hover{background:#3d6b1f}
+.submit-btn.cancel{background:var(--cream);color:var(--text);border:1px solid var(--border)}
+.submit-btn.delete-btn{background:var(--red)}
+.delete-confirm{
+  background:rgba(192,57,43,.05);border:1px solid rgba(192,57,43,.15);
+  border-radius:10px;padding:16px;margin-bottom:20px;color:var(--red);font-size:.875rem;line-height:1.6;
+}
+
+/* DETAIL */
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+.detail-item{background:var(--cream);border-radius:10px;padding:14px}
+.detail-key{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.detail-val{font-weight:600;font-size:.9rem}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:28px;right:28px;z-index:500;
+  background:#1a1a18;color:#f7f4ef;
+  padding:12px 20px;border-radius:10px;font-size:.85rem;font-weight:500;
+  transition:all .3s;opacity:0;transform:translateY(10px);
+  box-shadow:0 8px 30px rgba(0,0,0,.3);pointer-events:none;
+}
+.toast.show{opacity:1;transform:translateY(0)}
+
+footer{
+  padding:24px 48px;border-top:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+  color:var(--muted);font-size:.8rem;
+}
+
+@media(max-width:768px){
+  nav,footer{padding:0 20px;height:auto;padding-top:16px;padding-bottom:16px}
+  .hero-strip{padding:32px 20px}
+  .content{padding:20px 16px 60px}
+  .stats-row{gap:20px;flex-wrap:wrap}
+  footer{flex-direction:column;gap:8px;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <span class="logo">Rent<span>ora</span></span>
+  <div class="nav-right">
+    <span class="nav-stat" id="navStat"></span>
+    <button class="nav-btn" onclick="openModal('add')">+ Nova nekretnina</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero-strip">
+  <div class="hero-label">Upravljanje nekretninama</div>
+  <h1 class="hero-title">Vaš portfolio,<br>organizovan.</h1>
+  <p class="hero-sub">Pratite sve nekretnine, stanare, ugovore i prihode. Sve se čuva lokalno u vašem browseru.</p>
+  <div class="stats-row" id="statsRow"></div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <div id="statusFilters" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+    <div class="divider"></div>
+    <div id="typeFilters" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+    <input class="search-input" id="searchInput" placeholder="🔍 Pretraži..." oninput="renderAll()">
+    <select class="sort-select" onchange="currentSort=this.value;renderAll()">
+      <option value="newest">Najnovije</option>
+      <option value="rent-asc">Najam: rastuće</option>
+      <option value="rent-desc">Najam: opadajuće</option>
+      <option value="sqm">Površina</option>
+    </select>
+    <button class="add-btn-bar" onclick="openModal('add')">+ Dodaj</button>
+  </div>
+
+  <!-- GRID -->
+  <div class="grid" id="propertyGrid"></div>
+</div>
+
+<!-- MODAL OVERLAY -->
+<div class="overlay hidden" id="modalOverlay" onclick="closeModalIfBg(event)">
+  <div class="modal" id="modalBox" onclick="event.stopPropagation()">
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- FOOTER -->
+<footer>
+  <span class="logo" style="font-size:1rem">Rent<span>ora</span></span>
+  <span>© 2025 Rentora — Property Management · Demo</span>
+  <span>HTML · CSS · localStorage</span>
+</footer>
+
+<script>
+const STATUS = {
+  available:  {label:'Dostupno',    color:'#2d5016', bg:'rgba(45,80,22,.08)',   dot:'#4a9c1e'},
+  rented:     {label:'Iznajmljeno', color:'#c8a84b', bg:'rgba(200,168,75,.1)',  dot:'#c8a84b'},
+  maintenance:{label:'Održavanje',  color:'#c0392b', bg:'rgba(192,57,43,.08)',  dot:'#c0392b'},
+};
+const TYPES = {apartment:'Apartman',house:'Kuća',studio:'Studio',room:'Soba',commercial:'Poslovni'};
+const KEY = 'rentora_v2';
+
+const SEED = [
+  {id:'p1',name:'Elegantni apartman u centru',type:'apartment',status:'available',rent:850,rooms:2,sqm:65,city:'Beograd',address:'Knez Mihailova 14, Beograd',floor:3,furnished:true,parking:false,pets:true,image:'🏢',desc:'Potpuno opremljen stan u srcu grada. Visoki plafoni, parket, klima.',tenant:null,leaseEnd:null,notes:'Renoviran 2023.'},
+  {id:'p2',name:'Kuća sa vrtom',type:'house',status:'rented',rent:1200,rooms:4,sqm:140,city:'Novi Sad',address:'Futoška 88, Novi Sad',floor:0,furnished:false,parking:true,pets:true,image:'🏠',desc:'Samostalna kuća, dva sprata, garaža, vrt 200m². Mirna lokacija.',tenant:'Milica Đorđević',leaseEnd:'2025-09-01',notes:''},
+  {id:'p3',name:'Studio apartman',type:'studio',status:'available',rent:420,rooms:1,sqm:28,city:'Beograd',address:'Jurija Gagarina 14/5',floor:5,furnished:true,parking:false,pets:false,image:'🏠',desc:'Kompaktan studio, idealan za studente. Lift, interfon, blizu fakulteta.',tenant:null,leaseEnd:null,notes:'Slobodan od odmah.'},
+  {id:'p4',name:'Lux penthouse',type:'apartment',status:'available',rent:2200,rooms:4,sqm:180,city:'Beograd',address:'Savska 1, Beograd',floor:12,furnished:true,parking:true,pets:false,image:'🏙️',desc:'Dvonivovski penthouse, terasa 60m², panoramski pogled, smart home.',tenant:null,leaseEnd:null,notes:'Premium listing.'},
+  {id:'p5',name:'Poslovni prostor',type:'commercial',status:'rented',rent:1800,rooms:0,sqm:95,city:'Niš',address:'Obrenovićeva 21, Niš',floor:1,furnished:false,parking:true,pets:false,image:'🏪',desc:'Poslovni prostor u pješačkoj zoni. Izlog, klima, alarm.',tenant:'Tech Solutions d.o.o.',leaseEnd:'2026-01-01',notes:'Ugovor na 3 god.'},
+  {id:'p6',name:'Soba u dijeljenom stanu',type:'room',status:'available',rent:250,rooms:1,sqm:18,city:'Novi Sad',address:'Bulevar Oslobođenja 55',floor:2,furnished:true,parking:false,pets:false,image:'🛏️',desc:'Soba u 3-sobnom stanu. Zajednička kuhinja i kupatilo. Wifi uključen.',tenant:null,leaseEnd:null,notes:''},
+  {id:'p7',name:'Porodična kuća',type:'house',status:'maintenance',rent:950,rooms:3,sqm:110,city:'Subotica',address:'Korzo 7, Subotica',floor:0,furnished:false,parking:true,pets:true,image:'🏡',desc:'Kuća u mirnom dijelu, dvorište, podrum.',tenant:null,leaseEnd:null,notes:'Završetak radova: mart.'},
+  {id:'p8',name:'Moderni jednosoban',type:'apartment',status:'rented',rent:620,rooms:1,sqm:42,city:'Kragujevac',address:'Kralja Aleksandra 3',floor:4,furnished:true,parking:false,pets:true,image:'🏢',desc:'Potpuno renoviran, nova kuhinja, nova kupaonica.',tenant:'Nikola Stanković',leaseEnd:'2025-06-15',notes:''},
+];
+
+let properties = (() => { try { const d=localStorage.getItem(KEY); return d?JSON.parse(d):SEED; } catch{return SEED;} })();
+let filterStatus = 'all';
+let filterType = 'all';
+let currentSort = 'newest';
+let editingId = null;
+
+function save() { try{localStorage.setItem(KEY,JSON.stringify(properties));}catch{} }
+
+// STATS
+function updateStats() {
+  const rented = properties.filter(p=>p.status==='rented');
+  const revenue = rented.reduce((s,p)=>s+p.rent,0);
+  document.getElementById('navStat').textContent = `${rented.length} iznajmljenih · €${revenue.toLocaleString()}/mj`;
+  document.getElementById('statsRow').innerHTML = [
+    {n:properties.length,l:'Ukupno'},
+    {n:properties.filter(p=>p.status==='available').length,l:'Dostupnih'},
+    {n:rented.length,l:'Iznajmljenih'},
+    {n:`€${revenue.toLocaleString()}`,l:'Mjes. prihod'},
+  ].map(s=>`<div><div class="stat-num">${s.n}</div><div class="stat-label">${s.l}</div></div>`).join('');
+}
+
+// FILTERS
+function buildFilters() {
+  const statuses = ['all','available','rented','maintenance'];
+  document.getElementById('statusFilters').innerHTML = statuses.map(s =>
+    `<button class="filter-btn ${filterStatus===s?'active':''}" onclick="setStatus('${s}',this)">${s==='all'?'Sve':STATUS[s]?.label||s}</button>`
+  ).join('');
+  const types = ['all','apartment','house','studio','room','commercial'];
+  document.getElementById('typeFilters').innerHTML = types.map(t =>
+    `<button class="filter-btn ${filterType===t?'active':''}" onclick="setType('${t}',this)">${t==='all'?'Sve vrste':TYPES[t]||t}</button>`
+  ).join('');
+}
+
+function setStatus(s,el) {
+  filterStatus=s;
+  document.querySelectorAll('#statusFilters .filter-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active'); renderAll();
+}
+function setType(t,el) {
+  filterType=t;
+  document.querySelectorAll('#typeFilters .filter-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active'); renderAll();
+}
+
+function getFiltered() {
+  const q = document.getElementById('searchInput')?.value?.toLowerCase()||'';
+  let list = [...properties];
+  if(filterStatus!=='all') list=list.filter(p=>p.status===filterStatus);
+  if(filterType!=='all') list=list.filter(p=>p.type===filterType);
+  if(q) list=list.filter(p=>p.name.toLowerCase().includes(q)||p.city.toLowerCase().includes(q)||p.address.toLowerCase().includes(q));
+  if(currentSort==='rent-asc') list.sort((a,b)=>a.rent-b.rent);
+  else if(currentSort==='rent-desc') list.sort((a,b)=>b.rent-a.rent);
+  else if(currentSort==='sqm') list.sort((a,b)=>b.sqm-a.sqm);
+  return list;
+}
+
+function renderAll() {
+  updateStats(); buildFilters();
+  const list = getFiltered();
+  const grid = document.getElementById('propertyGrid');
+  if(!list.length){
+    grid.innerHTML='<div class="empty-state"><div style="font-size:3rem;margin-bottom:12px">🔍</div><div style="font-family:var(--fraunces);font-weight:700;font-size:1.2rem;margin-bottom:8px">Nema rezultata</div><div>Pokušajte s drugačijim filterima</div></div>';
+    return;
+  }
+  grid.innerHTML = list.map(p => {
+    const sc = STATUS[p.status];
+    return `
+    <div class="card" onclick="openDetail('${p.id}')">
+      <div class="card-img" style="background:${p.status==='rented'?'#fdf8ee':'var(--cream)'}">
+        <span>${p.image}</span>
+        <span class="card-badge" style="background:${sc.bg};color:${sc.color}">
+          <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${sc.dot};margin-right:5px"></span>${sc.label}
+        </span>
+        ${p.floor>0?`<span class="card-floor">${p.floor}. sprat</span>`:''}
+      </div>
+      <div class="card-body">
+        <div class="card-name">${p.name}</div>
+        <div class="card-addr">📍 ${p.address}</div>
+        <div class="card-meta">
+          ${p.rooms>0?`<span class="meta-item">🛏 ${p.rooms} sobe</span>`:''}
+          <span class="meta-item">📐 ${p.sqm}m²</span>
+          ${p.furnished?'<span class="meta-item">🪑 Namješteno</span>':''}
+          ${p.parking?'<span class="meta-item">🚗 Parking</span>':''}
+          ${p.pets?'<span class="meta-item">🐾 Ljubimci</span>':''}
+        </div>
+        ${p.tenant?`<div class="card-tenant"><span>👤</span><span>${p.tenant}</span>${p.leaseEnd?`<span style="margin-left:auto">do ${new Date(p.leaseEnd).toLocaleDateString('sr-RS')}</span>`:''}</div>`:''}
+        <div class="card-footer">
+          <div>
+            <div class="card-rent">€${p.rent}<span style="font-family:var(--dm);font-weight:400;font-size:.85rem;color:var(--muted)">/mj</span></div>
+            <div class="card-rent-sub">${TYPES[p.type]} · ${p.city}</div>
+          </div>
+          <div class="card-actions" onclick="event.stopPropagation()">
+            <button class="icon-btn" title="Uredi" onclick="openModal('edit','${p.id}')">✏️</button>
+            <button class="icon-btn danger" title="Obriši" onclick="openModal('delete','${p.id}')">🗑</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// MODAL
+function openModal(mode, id) {
+  editingId = id || null;
+  const p = id ? properties.find(x=>x.id===id) : null;
+  let html = '';
+
+  if(mode==='add'||mode==='edit'){
+    const v = p || {name:'',type:'apartment',status:'available',rent:'',rooms:'1',sqm:'',city:'',address:'',floor:'0',furnished:false,parking:false,pets:false,desc:'',tenant:'',leaseEnd:'',notes:''};
+    html = `
+    <div class="modal-header">
+      <div class="modal-title">${mode==='add'?'+ Nova nekretnina':'Uredi nekretninu'}</div>
+      <button class="close-btn" onclick="closeModal()">×</button>
+    </div>
+    <form class="modal-body" onsubmit="submitForm(event,'${mode}')">
+      <div class="form-group"><label class="form-label">Naziv</label>
+        <input required class="form-input" name="name" value="${v.name}" placeholder="Npr. Elegantni apartman u centru"></div>
+      <div class="form-row3" style="margin-bottom:16px">
+        <div><label class="form-label">Vrsta</label>
+          <select class="form-input" name="type">
+            ${Object.entries(TYPES).map(([k,l])=>`<option value="${k}"${v.type===k?' selected':''}>${l}</option>`).join('')}
+          </select></div>
+        <div><label class="form-label">Status</label>
+          <select class="form-input" name="status" onchange="toggleTenantFields(this.value)">
+            ${Object.entries(STATUS).map(([k,s])=>`<option value="${k}"${v.status===k?' selected':''}>${s.label}</option>`).join('')}
+          </select></div>
+        <div><label class="form-label">Najam (€/mj)</label>
+          <input required type="number" min="1" class="form-input" name="rent" value="${v.rent}" placeholder="650"></div>
+      </div>
+      <div class="form-row3" style="margin-bottom:16px">
+        <div><label class="form-label">Sobe</label><input type="number" min="0" class="form-input" name="rooms" value="${v.rooms}"></div>
+        <div><label class="form-label">Površina (m²)</label><input required type="number" min="1" class="form-input" name="sqm" value="${v.sqm}"></div>
+        <div><label class="form-label">Sprat</label><input type="number" min="0" class="form-input" name="floor" value="${v.floor}"></div>
+      </div>
+      <div class="form-row" style="margin-bottom:16px">
+        <div><label class="form-label">Grad</label><input required class="form-input" name="city" value="${v.city}" placeholder="Beograd"></div>
+        <div><label class="form-label">Adresa</label><input class="form-input" name="address" value="${v.address}" placeholder="Ulica i broj"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Opis</label>
+        <textarea class="form-input" name="desc" placeholder="Kratki opis nekretnine...">${v.desc}</textarea></div>
+      <div class="form-group"><label class="form-label">Karakteristike</label>
+        <div class="check-row">
+          <label class="check-item"><input type="checkbox" name="furnished" ${v.furnished?'checked':''}> 🪑 Namješteno</label>
+          <label class="check-item"><input type="checkbox" name="parking" ${v.parking?'checked':''}> 🚗 Parking</label>
+          <label class="check-item"><input type="checkbox" name="pets" ${v.pets?'checked':''}> 🐾 Ljubimci</label>
+        </div></div>
+      <div id="tenantFields" style="display:${v.status==='rented'?'block':'none'}">
+        <div class="form-row" style="margin-bottom:16px">
+          <div><label class="form-label">Stanar</label><input class="form-input" name="tenant" value="${v.tenant||''}" placeholder="Ime i prezime"></div>
+          <div><label class="form-label">Kraj ugovora</label><input type="date" class="form-input" name="leaseEnd" value="${v.leaseEnd||''}"></div>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Napomene</label>
+        <input class="form-input" name="notes" value="${v.notes||''}" placeholder="Interne napomene..."></div>
+      <button type="submit" class="submit-btn">${mode==='add'?'Dodaj nekretninu':'Sačuvaj promjene'}</button>
+    </form>`;
+  }
+  else if(mode==='delete'){
+    html = `
+    <div class="modal-header">
+      <div class="modal-title">Obriši nekretninu</div>
+      <button class="close-btn" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="delete-confirm">Jeste li sigurni da želite obrisati <strong>${p.name}</strong>?<br>Ova radnja je nepovratna.</div>
+      <div style="display:flex;gap:10px">
+        <button class="submit-btn cancel" onclick="closeModal()">Odustani</button>
+        <button class="submit-btn delete-btn" onclick="deleteProperty('${p.id}')">Da, obriši</button>
+      </div>
+    </div>`;
+  }
+  else if(mode==='detail'){
+    const sc=STATUS[p.status];
+    html = `
+    <div class="modal-header">
+      <div>
+        <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">${TYPES[p.type]} · ${p.city}</div>
+        <div class="modal-title">${p.name}</div>
+      </div>
+      <button class="close-btn" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;gap:16px;margin:12px 0 16px">
+        <span style="font-size:3rem">${p.image}</span>
+        <div>
+          <span style="display:inline-flex;align-items:center;gap:6px;background:${sc.bg};color:${sc.color};padding:4px 12px;border-radius:100px;font-size:.78rem;font-weight:700">
+            <span style="width:6px;height:6px;border-radius:50%;background:${sc.dot};display:inline-block"></span>${sc.label}
+          </span>
+          <div style="font-family:var(--fraunces);font-size:2rem;font-weight:700;margin-top:4px">€${p.rent}<span style="font-size:1rem;font-weight:400;color:var(--muted)">/mj</span></div>
+        </div>
+      </div>
+      <div style="color:var(--muted);font-size:.875rem;margin-bottom:16px">📍 ${p.address}</div>
+      ${p.desc?`<div style="background:var(--cream);border-radius:10px;padding:14px;margin-bottom:16px;font-size:.875rem;line-height:1.6;color:#3a3830">${p.desc}</div>`:''}
+      <div class="detail-grid">
+        ${p.rooms>0?`<div class="detail-item"><div class="detail-key">Sobe</div><div class="detail-val">${p.rooms}</div></div>`:''}
+        <div class="detail-item"><div class="detail-key">Površina</div><div class="detail-val">${p.sqm} m²</div></div>
+        <div class="detail-item"><div class="detail-key">Sprat</div><div class="detail-val">${p.floor===0?'Prizemlje':p.floor+'. sprat'}</div></div>
+        <div class="detail-item"><div class="detail-key">Namješteno</div><div class="detail-val">${p.furnished?'✓ Da':'✗ Ne'}</div></div>
+        <div class="detail-item"><div class="detail-key">Parking</div><div class="detail-val">${p.parking?'✓ Da':'✗ Ne'}</div></div>
+        <div class="detail-item"><div class="detail-key">Ljubimci</div><div class="detail-val">${p.pets?'✓ OK':'✗ Ne'}</div></div>
+      </div>
+      ${p.tenant?`<div style="background:#fdf8ee;border:1px solid rgba(200,168,75,.2);border-radius:10px;padding:14px;margin-bottom:16px">
+        <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Stanar</div>
+        <div style="font-weight:600">👤 ${p.tenant}</div>
+        ${p.leaseEnd?`<div style="color:var(--muted);font-size:.82rem;margin-top:4px">Ugovor ističe: ${new Date(p.leaseEnd).toLocaleDateString('sr-RS')}</div>`:''}
+      </div>`:''}
+      ${p.notes?`<div style="color:var(--muted);font-size:.82rem;font-style:italic;margin-bottom:16px">📝 ${p.notes}</div>`:''}
+      <div style="display:flex;gap:10px;margin-top:12px">
+        <button class="submit-btn" style="flex:1" onclick="closeModal();openModal('edit','${p.id}')">✏️ Uredi</button>
+        <button class="submit-btn delete-btn" style="flex:0;padding:13px 20px" onclick="openModal('delete','${p.id}')">🗑</button>
+      </div>
+    </div>`;
+  }
+
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modalOverlay').classList.remove('hidden');
+}
+
+function openDetail(id) { openModal('detail', id); }
+
+function toggleTenantFields(val) {
+  const el = document.getElementById('tenantFields');
+  if(el) el.style.display = val==='rented'?'block':'none';
+}
+
+function submitForm(e, mode) {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const data = {
+    name: fd.get('name'),type: fd.get('type'),status: fd.get('status'),
+    rent: Number(fd.get('rent')),rooms: Number(fd.get('rooms')),
+    sqm: Number(fd.get('sqm')),floor: Number(fd.get('floor')),
+    city: fd.get('city'),address: fd.get('address'),
+    furnished: fd.get('furnished')==='on',parking: fd.get('parking')==='on',pets: fd.get('pets')==='on',
+    desc: fd.get('desc'),
+    tenant: fd.get('tenant')||null,leaseEnd: fd.get('leaseEnd')||null,notes: fd.get('notes'),
+    image: getEmoji(fd.get('type')),
+  };
+  if(mode==='add'){
+    properties.unshift({...data, id:'p'+Date.now()});
+    showToast('✓ Nekretnina dodana!');
+  } else {
+    properties = properties.map(p => p.id===editingId ? {...p,...data} : p);
+    showToast('✓ Nekretnina ažurirana!');
+  }
+  save(); closeModal(); renderAll();
+}
+
+function getEmoji(type){return{apartment:'🏢',house:'🏠',studio:'🏠',room:'🛏️',commercial:'🏪'}[type]||'🏢'}
+
+function deleteProperty(id) {
+  properties = properties.filter(p=>p.id!==id);
+  save(); closeModal(); showToast('Nekretnina obrisana.'); renderAll();
+}
+
+function closeModal() { document.getElementById('modalOverlay').classList.add('hidden'); }
+function closeModalIfBg(e) { if(e.target===document.getElementById('modalOverlay')) closeModal(); }
+
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+// INIT
+renderAll();
+</script>
+</body>
+</html>
